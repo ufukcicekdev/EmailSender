@@ -4,6 +4,7 @@ import smtplib
 from dotenv import load_dotenv
 import os
 import logging
+from datetime import datetime
 
 logging.basicConfig(filename='logFile.log', encoding='utf-8', level=logging.DEBUG)
 
@@ -19,6 +20,7 @@ subject = 'Python Email Sender (Test Mail)'
 body = """
 Test Mail 
 """
+
 
 def mailMessage():
     em["From"] = email_sender
@@ -43,13 +45,10 @@ def mailSender():
         with smtplib.SMTP_SSL('smtp.gmail.com',465, context=context) as smtp:
             smtp.login(email_sender,email_password)
             smtp.sendmail(email_sender, email_receiver, em.as_string())
-            print("Success!")
+            logging.info(f"Email Sent Done! -- Time: {datetime.now()} -- Receiver: {email_receiver}")
 
     except Exception as e:
         logging.error("Exception occurred", exc_info=True)
-
-
-
 
 
 
