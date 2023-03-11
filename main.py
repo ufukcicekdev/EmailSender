@@ -4,8 +4,10 @@ import smtplib
 from dotenv import load_dotenv
 import os
 
+
 load_dotenv()
 
+attachment_path = "Attachments/"
 
 email_sender = os.getenv("EMAIL_SENDER")
 email_password = os.getenv("EMAIL_PASSWORD")
@@ -28,10 +30,11 @@ em.set_content(body)
 context = ssl.create_default_context()
 
 
-with open('sample.pdf', 'rb') as content_file:
-    content = content_file.read()
-    em.add_attachment(content, maintype='application', subtype='pdf', filename='sample.pdf')
-
+for fileName in os.listdir(attachment_path):
+    with open(attachment_path + f"{fileName}", 'rb') as f:
+        content = f.read()
+        name, fileType  = os.path.splitext(fileName)
+        em.add_attachment(content, maintype='application', subtype=fileType.replace(".",""), filename=name)
 
 
 with smtplib.SMTP_SSL('smtp.gmail.com',465, context=context) as smtp:
