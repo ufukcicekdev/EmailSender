@@ -16,18 +16,15 @@ em = EmailMessage()
 attachment_path = os.getenv("ATTACHMENT_PATH")
 email_sender = os.getenv("EMAIL_SENDER")
 email_password = os.getenv("EMAIL_PASSWORD")
-email_receiver = os.getenv("EMAIL_RECEIVER")
+email_receivers = ["ufukcicek199@icloud.com","ufukcicek199@gmail.com"]
 subject = 'Python Email Sender (Test Mail)'
 
 body = """
 Test Mail 
 """
-def mailMessage():
-    em = EmailMessage()
-    em["From"] = email_sender
-    em["To"] = email_receiver
-    em["Subject"] = subject
-    em.set_content(body)
+em["From"] = email_sender
+em["Subject"] = subject
+em.set_content(body)
 
 def attachmentReader():
     for fileName in os.listdir(attachment_path):
@@ -36,23 +33,25 @@ def attachmentReader():
             name, fileType  = os.path.splitext(fileName)
             em.add_attachment(content, maintype='application', subtype=fileType.replace(".",""), filename=name)
 
-def mailSender():
+def mailSender(email_receivers):
     try:
         context = ssl.create_default_context()
-        with smtplib.SMTP_SSL('smtp.gmail.com',465,context=context) as server:
-            server.login(email_sender,email_password)
-            server.sendmail(email_sender, email_receiver, em.as_string())
-            logging.info(f"Email Sent Done! -- Time: {datetime.now()} -- Receiver: {email_receiver}")
-            server.quit()
+        for email_receiver in email_receivers:
+            em["To"] = email_receiver
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as server:
+                server.login(email_sender,email_password)
+                server.sendmail(email_sender, email_receiver, em.as_string())
+                logging.info(f"Email Sent Done! -- Time: {datetime.now()} -- Receiver: {email_receiver}")
+                server.quit()
+                del em["To"]                
     except Exception as e:
         logging.error("Exception occurred", exc_info=True)
 
 
 
 def job():
-    mailMessage()
     attachmentReader()
-    mailSender()   
+    mailSender(email_receivers)   
 
 schedule.every(10).seconds.do(job)
 # schedule.every(10).minutes.do(job)
